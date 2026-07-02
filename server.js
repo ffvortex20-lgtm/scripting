@@ -1,20 +1,30 @@
-// Exemplo de como adaptar o comando IG
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const cors = require('cors');
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
 app.use(express.json());
 
-app.post('/api/instagram', async (req, res) => {
-    const { url } = req.body;
+// Rota de teste
+app.get('/', (req, res) => {
+    res.send('Servidor do Scripting está rodando!');
+});
+
+// Rota de Download (TikTok, YouTube, Insta)
+app.get('/download', async (req, res) => {
+    const { url, platform } = req.query;
+    const apiKey = 'SUA_APIKEY_AQUI'; // Coloque sua chave aqui
+
+    let apiUrl = '';
+    if (platform === 'tiktok') apiUrl = `https://systemzone.store/api/tiktok/dl?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+    if (platform === 'youtube') apiUrl = `https://systemzone.store/api/youtube/dl?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+    
     try {
-        const { data } = await axios.get(`https://systemzone.store/api/V2/instagram?apikey=SUA_KEY&url=${encodeURIComponent(url)}`);
+        const { data } = await axios.get(apiUrl);
         res.json(data);
     } catch (e) {
-        res.status(500).send("Erro no servidor");
+        res.status(500).json({ error: "Erro ao baixar mídia" });
     }
 });
 
-app.listen(3000, () => console.log('Servidor rodando!'));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
